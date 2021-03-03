@@ -1,8 +1,9 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
+const { Mongoose } = require("mongoose");
 
 
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
 
     if (!req.body.email || !req.body.password) {
         return res.status(400).send({
@@ -12,7 +13,7 @@ exports.create = (req, res) => {
 
     const user = new User({
         email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10),
+        password: await bcrypt.hash(req.body.password, 10),
     });
 
     user
@@ -104,4 +105,10 @@ exports.login = (req, res) => {
             message: "required fields cannot be empty",
         });
     }
+}
+
+exports.findByEmail = async (req, res) => {
+    let requestEmail = req.body.email;
+    let foundUser = await User.findOne({ email: requestEmail }).select('+password');
+    return foundUser;
 }
